@@ -1,0 +1,9 @@
+githubRepoOwner: inigolabs
+githubRepoName: parquet
+githubHost: github.com
+requireChecks: true
+requireApproval: true
+githubRemote: origin
+githubBranch: master
+remoteBranches: []
+mergeMethod: rebase
