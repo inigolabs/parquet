@@ -3,6 +3,7 @@ package parquet
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"math/bits"
 	"strings"
 
@@ -111,12 +112,12 @@ func (f *RequiredField) DoWrite(w io.Writer, meta *Metadata, vals []byte, count 
 }
 
 // DoRead reads the actual raw data.
-func (f *RequiredField) DoRead(r io.ReadSeeker, pg Page) (io.Reader, []int, error) {
+func (f *RequiredField) DoRead(ctx context.Context, r io.ReadSeeker, pg Page) (io.Reader, []int, error) {
 	var nRead int
 	var out []byte
 	var sizes []int
 	for nRead < pg.N {
-		ph, err := PageHeader(r)
+		ph, err := PageHeader(ctx, r)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -272,7 +273,7 @@ func (f *OptionalField) DoWrite(w io.Writer, meta *Metadata, vals []byte, count 
 
 // DoRead is called by all optional fields.  It reads the definition levels and uses
 // them to interpret the raw data.
-func (f *OptionalField) DoRead(r io.ReadSeeker, pg Page) (io.Reader, []int, error) {
+func (f *OptionalField) DoRead(ctx context.Context, r io.ReadSeeker, pg Page) (io.Reader, []int, error) {
 	var nRead int
 	var out []byte
 	var sizes []int
@@ -280,7 +281,7 @@ func (f *OptionalField) DoRead(r io.ReadSeeker, pg Page) (io.Reader, []int, erro
 
 	for nRead < pg.Size {
 		rc = &readCounter{r: r}
-		ph, err := PageHeader(rc)
+		ph, err := PageHeader(ctx, rc)
 		if err != nil {
 			return nil, nil, err
 		}

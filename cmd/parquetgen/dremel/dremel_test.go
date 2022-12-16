@@ -2,6 +2,7 @@ package dremel_test
 
 import (
 	"bytes"
+	"context"
 	"testing"
 
 	"github.com/inigolabs/parquet/cmd/parquetgen/dremel/testcases/doc"
@@ -53,6 +54,7 @@ var (
 // TestLevels verifies that the example from the dremel paper
 // results in the correct definition and repetition levels.
 func TestLevels(t *testing.T) {
+	ctx := context.Background()
 	var buf bytes.Buffer
 	pw, err := doc.NewParquetWriter(&buf)
 	if err != nil {
@@ -69,7 +71,7 @@ func TestLevels(t *testing.T) {
 
 	pw.Close()
 
-	pr, err := doc.NewParquetReader(bytes.NewReader(buf.Bytes()))
+	pr, err := doc.NewParquetReader(ctx, bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		assert.NoError(t, err)
 	}
@@ -103,6 +105,7 @@ var (
 )
 
 func TestPersonLevels(t *testing.T) {
+	ctx := context.Background()
 	var buf bytes.Buffer
 	pw, err := person.NewParquetWriter(&buf)
 	if err != nil {
@@ -119,7 +122,7 @@ func TestPersonLevels(t *testing.T) {
 
 	pw.Close()
 
-	pr, err := person.NewParquetReader(bytes.NewReader(buf.Bytes()))
+	pr, err := person.NewParquetReader(ctx, bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		assert.NoError(t, err)
 	}
@@ -138,6 +141,7 @@ func TestPersonLevels(t *testing.T) {
 // TestDremel uses the example from the dremel paper and writes then
 // reads from a parquet file to make sure nested fields work correctly.
 func TestDremel(t *testing.T) {
+	ctx := context.Background()
 	var buf bytes.Buffer
 	pw, err := doc.NewParquetWriter(&buf)
 	if err != nil {
@@ -154,13 +158,13 @@ func TestDremel(t *testing.T) {
 
 	pw.Close()
 
-	pr, err := doc.NewParquetReader(bytes.NewReader(buf.Bytes()))
+	pr, err := doc.NewParquetReader(ctx, bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var out []doc.Document
-	for pr.Next() {
+	for pr.Next(ctx) {
 		var d doc.Document
 		pr.Scan(&d)
 		out = append(out, d)
@@ -247,6 +251,7 @@ var (
 )
 
 func TestRepetition(t *testing.T) {
+	ctx := context.Background()
 	var buf bytes.Buffer
 	pw, err := repetition.NewParquetWriter(&buf)
 	if err != nil {
@@ -263,13 +268,13 @@ func TestRepetition(t *testing.T) {
 
 	pw.Close()
 
-	pr, err := repetition.NewParquetReader(bytes.NewReader(buf.Bytes()))
+	pr, err := repetition.NewParquetReader(ctx, bytes.NewReader(buf.Bytes()))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	var out []repetition.Document
-	for pr.Next() {
+	for pr.Next(ctx) {
 		var d repetition.Document
 		pr.Scan(&d)
 		out = append(out, d)
