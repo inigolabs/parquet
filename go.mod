@@ -1,4 +1,4 @@
-module github.com/parsyl/parquet
+module github.com/inigolabs/parquet
 
 go 1.13
 
