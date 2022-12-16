@@ -3,6 +3,7 @@ package main
 //go:generate parquetgen -input main.go -type Person -package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"log"
@@ -14,15 +15,16 @@ var (
 )
 
 func main() {
+	ctx := context.Background()
 	flag.Parse()
 	if *rd != "" {
-		read()
+		read(ctx)
 	} else {
-		write()
+		write(ctx)
 	}
 }
 
-func write() {
+func write(ctx context.Context) {
 	f, err := os.Create("people.parquet")
 	if err != nil {
 		log.Fatal(err)
@@ -58,20 +60,20 @@ func write() {
 	}
 }
 
-func read() {
+func read(ctx context.Context) {
 	f, err := os.Open(*rd)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	r, err := NewParquetReader(f)
+	r, err := NewParquetReader(ctx, f)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	enc := json.NewEncoder(os.Stdout)
-	for r.Next() {
+	for r.Next(ctx) {
 		var p Person
 		r.Scan(&p)
 		enc.Encode(p)

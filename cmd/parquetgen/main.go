@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"io"
@@ -32,15 +33,16 @@ func main() {
 		log.Fatal("choose -parquet or -input, but not both")
 	}
 
+	ctx := context.Background()
 	var err error
 	if *metadata {
-		readFooter()
+		readFooter(ctx)
 	} else if *pageheaders {
-		readPageHeaders()
+		readPageHeaders(ctx)
 	} else if *parq == "" {
 		err = gen.FromStruct(*pth, *outPth, *typ, *pkg, *imp, *ignore)
 	} else {
-		err = gen.FromParquet(*parq, *structOutPth, *outPth, *typ, *pkg, *imp, *ignore)
+		err = gen.FromParquet(ctx, *parq, *structOutPth, *outPth, *typ, *pkg, *imp, *ignore)
 	}
 
 	if err != nil {
@@ -48,11 +50,11 @@ func main() {
 	}
 }
 
-func readPageHeaders() {
+func readPageHeaders(ctx context.Context) {
 	f := openParquet()
-	footer := getFooter(f)
+	footer := getFooter(ctx, f)
 
-	pageHeaders, err := parquet.PageHeaders(footer, f)
+	pageHeaders, err := parquet.PageHeaders(ctx, footer, f)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,9 +72,9 @@ func readPageHeaders() {
 	})
 }
 
-func readFooter() {
+func readFooter(ctx context.Context) {
 	f := openParquet()
-	footer := getFooter(f)
+	footer := getFooter(ctx, f)
 	f.Close()
 	enc := json.NewEncoder(os.Stdout)
 	enc.SetIndent("", "  ")
@@ -91,8 +93,8 @@ func openParquet() *os.File {
 	return f
 }
 
-func getFooter(r io.ReadSeeker) *sch.FileMetaData {
-	footer, err := parquet.ReadMetaData(r)
+func getFooter(ctx context.Context, r io.ReadSeeker) *sch.FileMetaData {
+	footer, err := parquet.ReadMetaData(ctx, r)
 	if err != nil {
 		log.Fatal("couldn't read footer: ", err)
 	}
