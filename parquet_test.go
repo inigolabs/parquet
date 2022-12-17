@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-//go:generate parquetgen -input parquet_test.go -type Person -package parquet_test -output parquet_generated_test.go
+//go:generate go run github.com/inigolabs/parquet/cmd/parquetgen -input parquet_test.go -type Person -package parquet_test -output parquet_generated_test.go
 
 func init() {
 	rand.Seed(time.Now().UnixNano())

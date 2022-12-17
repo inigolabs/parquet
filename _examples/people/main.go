@@ -1,6 +1,6 @@
 package main
 
-//go:generate parquetgen -input main.go -type Person -package main
+//go:generate go run github.com/inigolabs/parquet/cmd/parquetgen -input main.go -type Person -package main
 
 import (
 	"encoding/json"

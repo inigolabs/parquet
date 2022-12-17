@@ -1,0 +1,58 @@
+auto_update: true
+generators:
+    bitpack:
+        path: internal/bitpack/generate.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/bitpackgen -package bitpack -maxwidth 4
+        gen_dep: ""
+        inputs:
+            - internal/bitpack/*
+        outputs: []
+    dremel_testcases_doc:
+        path: cmd/parquetgen/dremel/testcases/doc/doc.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/parquetgen -input doc.go -type Document -package doc -output generated.go
+        gen_dep: ""
+        inputs:
+            - cmd/parquetgen/dremel/testcases/doc/doc.go
+        outputs:
+            - cmd/parquetgen/dremel/testcases/doc/generated.go
+    dremel_testcases_person:
+        path: cmd/parquetgen/dremel/testcases/person/person.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/parquetgen -input person.go -type Person -package person -output generated.go
+        gen_dep: ""
+        inputs:
+            - cmd/parquetgen/dremel/testcases/person/person.go
+        outputs:
+            - cmd/parquetgen/dremel/testcases/person/generated.go
+    dremel_testcases_repetition:
+        path: cmd/parquetgen/dremel/testcases/repetition/repetition.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/parquetgen -input repetition.go -type Document -package repetition -output generated.go
+        gen_dep: ""
+        inputs:
+            - cmd/parquetgen/dremel/testcases/repetition/repetition.go
+        outputs:
+            - cmd/parquetgen/dremel/testcases/repetition/generated.go
+    examples_people:
+        path: _examples/people/main.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/parquetgen -input main.go -type Person -package main
+        gen_dep: ""
+        inputs:
+            - _examples/people/main.go
+        outputs:
+            - _examples/people/parquet.go
+    examples_via_parquet:
+        path: _examples/via_parquet/main.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/parquetgen --parquet ./people.parquet --type Person --package main
+        gen_dep: ""
+        inputs:
+            - _examples/via_parquet/main.go
+        outputs:
+            - _examples/via_parquet/generated_struct.go
+            - _examples/via_parquet/parquet.go
+    parquet_test:
+        path: parquet_test.go
+        gen_cmd: go run github.com/inigolabs/parquet/cmd/parquetgen -input parquet_test.go -type Person -package parquet_test -output parquet_generated_test.go
+        gen_dep: ""
+        inputs:
+            - parquet_test.go
+        outputs:
+            - parquet_generated_test.go
