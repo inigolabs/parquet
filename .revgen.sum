@@ -1,0 +1,21 @@
+bitpack:
+    inputs_hash: 67568de7c304ee8621574cccd39b8a22
+    outputs_hash: ""
+dremel_testcases_doc:
+    inputs_hash: 45473362f88d837df3ba697d7b91a18a
+    outputs_hash: e908058c0c3eb5fc13fe0f25f7ebef3a
+dremel_testcases_person:
+    inputs_hash: db116b13b5325001ff7c4fe4112eddc4
+    outputs_hash: c0b5677c54100486ec75463411815a72
+dremel_testcases_repetition:
+    inputs_hash: 3d0a2dfa5a3b05d2be199c669555416c
+    outputs_hash: ce371e6427adbe737335b931f4f746d2
+examples_people:
+    inputs_hash: df2d9ebc840cda2b32f425cec97383b1
+    outputs_hash: 82f5b2b3f1ebf6ac68b40c8bb84cf557
+examples_via_parquet:
+    inputs_hash: ee63ce0ab935ad63d635fd0201a40714
+    outputs_hash: f620721e9f1f2b81b8f27a1c2b60e2b9
+parquet_test:
+    inputs_hash: 75fc49c62286d85d71cd3d6ce83c2006
+    outputs_hash: 8d9251e8e0b28826ec0a01f2ac917386

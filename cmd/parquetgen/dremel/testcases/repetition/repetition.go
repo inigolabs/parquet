@@ -1,6 +1,6 @@
 package repetition
 
-//go:generate parquetgen -input repetition.go -type Document -package repetition -output generated.go
+//go:generate go run github.com/inigolabs/parquet/cmd/parquetgen -input repetition.go -type Document -package repetition -output generated.go
 
 type (
 	Document struct {

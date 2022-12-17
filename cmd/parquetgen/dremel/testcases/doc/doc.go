@@ -1,6 +1,6 @@
 package doc
 
-//go:generate parquetgen -input doc.go -type Document -package doc -output generated.go
+//go:generate go run github.com/inigolabs/parquet/cmd/parquetgen -input doc.go -type Document -package doc -output generated.go
 
 type Link struct {
 	Backward []int64 `parquet:"backward"`

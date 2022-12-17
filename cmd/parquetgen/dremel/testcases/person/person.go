@@ -1,6 +1,6 @@
 package person
 
-//go:generate parquetgen -input person.go -type Person -package person -output generated.go
+//go:generate go run github.com/inigolabs/parquet/cmd/parquetgen -input person.go -type Person -package person -output generated.go
 
 type Skill struct {
 	Name       string `parquet:"name"`
