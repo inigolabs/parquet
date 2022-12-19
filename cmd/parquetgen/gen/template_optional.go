@@ -39,8 +39,8 @@ func (f *{{.FieldType}}) Write(w io.Writer, meta *parquet.Metadata) error {
 	return f.DoWrite(w, meta, buf.Bytes(), len(f.Defs), f.stats)
 }
 
-func (f *{{.FieldType}}) Read(r io.ReadSeeker, pg parquet.Page) error {
-	rr, _, err := f.DoRead(r, pg)
+func (f *{{.FieldType}}) Read(ctx context.Context, r io.ReadSeeker, pg parquet.Page) error {
+	rr, _, err := f.DoRead(ctx, r, pg)
 	if err != nil {
 		return err
 	}
