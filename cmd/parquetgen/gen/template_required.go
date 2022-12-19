@@ -22,8 +22,8 @@ func (f *{{.FieldType}}) Schema() parquet.Field {
 	return parquet.Field{Name: f.Name(), Path: f.Path(), Type: {{.ParquetType}}, RepetitionType: parquet.RepetitionRequired, Types: []int{0}}
 }
 
-func (f *{{.FieldType}}) Read(r io.ReadSeeker, pg parquet.Page) error {
-	rr, _, err := f.DoRead(r, pg)
+func (f *{{.FieldType}}) Read(ctx context.Context, r io.ReadSeeker, pg parquet.Page) error {
+	rr, _, err := f.DoRead(ctx, r, pg)
 	if err != nil {
 		return err
 	}

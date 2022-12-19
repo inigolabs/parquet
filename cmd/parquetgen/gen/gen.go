@@ -2,6 +2,7 @@ package gen
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"go/format"
 	"os"
@@ -98,13 +99,13 @@ func FromStruct(pth, outPth, typ, pkg, imp string, ignore bool) error {
 
 // FromParquet generates a go struct, a reader, and a writer based
 // on the parquet file at 'parq'
-func FromParquet(parq, pth, outPth, typ, pkg, imp string, ignore bool) error {
+func FromParquet(ctx context.Context, parq, pth, outPth, typ, pkg, imp string, ignore bool) error {
 	pf, err := os.Open(parq)
 	if err != nil {
 		return err
 	}
 
-	footer, err := parquet.ReadMetaData(pf)
+	footer, err := parquet.ReadMetaData(ctx, pf)
 	if err != nil {
 		return fmt.Errorf("couldn't read footer: %s", err)
 	}

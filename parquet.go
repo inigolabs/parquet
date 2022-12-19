@@ -355,7 +355,7 @@ func (m *Metadata) Pages() (map[string][]Page, error) {
 }
 
 // ReadMetaData reads the FileMetaData from the end of a parquet file
-func ReadMetaData(r io.ReadSeeker) (*sch.FileMetaData, error) {
+func ReadMetaData(ctx context.Context, r io.ReadSeeker) (*sch.FileMetaData, error) {
 	p := thrift.NewTCompactProtocol(&thrift.StreamTransport{Reader: r})
 	size, err := getMetaDataSize(r)
 	if err != nil {
@@ -368,31 +368,31 @@ func ReadMetaData(r io.ReadSeeker) (*sch.FileMetaData, error) {
 	}
 
 	m := sch.NewFileMetaData()
-	return m, m.Read(p)
+	return m, m.Read(ctx, p)
 }
 
 // ReadFooter reads the parquet metadata
-func (m *Metadata) ReadFooter(r io.ReadSeeker) error {
-	meta, err := ReadMetaData(r)
+func (m *Metadata) ReadFooter(ctx context.Context, r io.ReadSeeker) error {
+	meta, err := ReadMetaData(ctx, r)
 	m.metadata = meta
 	return err
 }
 
 // PageHeader reads the page header from a column page
-func PageHeader(r io.Reader) (*sch.PageHeader, error) {
+func PageHeader(ctx context.Context, r io.Reader) (*sch.PageHeader, error) {
 	p := thrift.NewTCompactProtocol(&thrift.StreamTransport{Reader: r})
 	pg := &sch.PageHeader{}
-	err := pg.Read(p)
+	err := pg.Read(ctx, p)
 	return pg, err
 }
 
 // PageHeaders reads all the page headers without reading the actual
 // data.  It is used by parquetgen to print the page headers.
-func PageHeaders(footer *sch.FileMetaData, r io.ReadSeeker) ([]sch.PageHeader, error) {
+func PageHeaders(ctx context.Context, footer *sch.FileMetaData, r io.ReadSeeker) ([]sch.PageHeader, error) {
 	var pageHeaders []sch.PageHeader
 	for _, rg := range footer.RowGroups {
 		for _, col := range rg.Columns {
-			h, err := PageHeadersAtOffset(r, col.MetaData.DataPageOffset, col.MetaData.NumValues)
+			h, err := PageHeadersAtOffset(ctx, r, col.MetaData.DataPageOffset, col.MetaData.NumValues)
 			if err != nil {
 				return nil, err
 			}
@@ -404,7 +404,7 @@ func PageHeaders(footer *sch.FileMetaData, r io.ReadSeeker) ([]sch.PageHeader, e
 
 // PageHeadersAtOffset seeks to the given offset, then reads the PageHeader
 // without reading the data.
-func PageHeadersAtOffset(r io.ReadSeeker, o, n int64) ([]sch.PageHeader, error) {
+func PageHeadersAtOffset(ctx context.Context, r io.ReadSeeker, o, n int64) ([]sch.PageHeader, error) {
 	var out []sch.PageHeader
 	var nRead int64
 	_, err := r.Seek(o, io.SeekStart)
@@ -422,7 +422,7 @@ func PageHeadersAtOffset(r io.ReadSeeker, o, n int64) ([]sch.PageHeader, error) 
 			readOne = true
 		}
 		rc := &readCounter{r: r}
-		ph, err := PageHeader(rc)
+		ph, err := PageHeader(ctx, rc)
 		if err != nil {
 			return nil, fmt.Errorf("unable to read page header: %s", err)
 		}

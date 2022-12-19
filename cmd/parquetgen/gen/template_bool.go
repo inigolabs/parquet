@@ -35,8 +35,8 @@ func (f *BoolField) Write(w io.Writer, meta *parquet.Metadata) error {
 	return f.DoWrite(w, meta, rawBuf, len(f.vals), newBoolStats())
 }
 
-func (f *BoolField) Read(r io.ReadSeeker, pg parquet.Page) error {
-	rr, sizes, err := f.DoRead(r, pg)
+func (f *BoolField) Read(ctx context.Context, r io.ReadSeeker, pg parquet.Page) error {
+	rr, sizes, err := f.DoRead(ctx, r, pg)
 	if err != nil {
 		return err
 	}

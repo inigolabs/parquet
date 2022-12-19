@@ -2,6 +2,7 @@ package parquet_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -452,6 +453,7 @@ func TestParquet(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
 	for i, tc := range testCases {
 		for j, comp := range compressionCases {
 			t.Run(fmt.Sprintf("%02d %s %s", 2*i+j, tc.name, comp), func(t *testing.T) {
@@ -471,7 +473,7 @@ func TestParquet(t *testing.T) {
 				err = w.Close()
 				assert.Nil(t, err, tc.name)
 
-				r, err := NewParquetReader(bytes.NewReader(buf.Bytes()))
+				r, err := NewParquetReader(ctx, bytes.NewReader(buf.Bytes()))
 				if !assert.NoError(t, err) {
 					return
 				}
@@ -486,7 +488,7 @@ func TestParquet(t *testing.T) {
 				}
 
 				var i int
-				for r.Next() {
+				for r.Next(ctx) {
 					var p Person
 					r.Scan(&p)
 					exp := getExpected(expected, i)
@@ -502,6 +504,7 @@ func TestParquet(t *testing.T) {
 }
 
 func TestPageHeaders(t *testing.T) {
+	ctx := context.Background()
 	var buf bytes.Buffer
 	w, err := NewParquetWriter(&buf, MaxPageSize(2))
 	if !assert.NoError(t, err) {
@@ -522,12 +525,12 @@ func TestPageHeaders(t *testing.T) {
 	assert.NoError(t, w.Close())
 
 	rd := bytes.NewReader(buf.Bytes())
-	footer, err := parquet.ReadMetaData(rd)
+	footer, err := parquet.ReadMetaData(ctx, rd)
 	if !assert.NoError(t, err) {
 		return
 	}
 
-	pageHeaders, err := parquet.PageHeaders(footer, rd)
+	pageHeaders, err := parquet.PageHeaders(ctx, footer, rd)
 	if !assert.NoError(t, err) {
 		return
 	}
@@ -710,6 +713,7 @@ func TestStats(t *testing.T) {
 		},
 	}
 
+	ctx := context.Background()
 	for i, tc := range testCases {
 		for j, comp := range []string{"uncompressed", "snappy"} {
 			t.Run(fmt.Sprintf("%02d %s %s", 2*i+j, tc.name, comp), func(t *testing.T) {
@@ -730,12 +734,12 @@ func TestStats(t *testing.T) {
 				assert.Nil(t, err, tc.name)
 
 				r := bytes.NewReader(buf.Bytes())
-				footer, err := parquet.ReadMetaData(r)
+				footer, err := parquet.ReadMetaData(ctx, r)
 				if !assert.NoError(t, err) {
 					return
 				}
 
-				pages, err := getPageHeaders(r, tc.col, footer)
+				pages, err := getPageHeaders(ctx, r, tc.col, footer)
 				if !assert.NoError(t, err) {
 					return
 				}
@@ -758,13 +762,13 @@ func TestStats(t *testing.T) {
 	}
 }
 
-func getPageHeaders(r io.ReadSeeker, name string, footer *sch.FileMetaData) ([]sch.PageHeader, error) {
+func getPageHeaders(ctx context.Context, r io.ReadSeeker, name string, footer *sch.FileMetaData) ([]sch.PageHeader, error) {
 	var out []sch.PageHeader
 	for _, rg := range footer.RowGroups {
 		for _, col := range rg.Columns {
 			pth := col.MetaData.PathInSchema
 			if pth[len(pth)-1] == name {
-				h, err := parquet.PageHeadersAtOffset(r, col.MetaData.DataPageOffset, col.MetaData.NumValues)
+				h, err := parquet.PageHeadersAtOffset(ctx, r, col.MetaData.DataPageOffset, col.MetaData.NumValues)
 				if err != nil {
 					return nil, err
 				}
@@ -920,6 +924,7 @@ func newPerson(i int) Person {
 }
 
 func BenchmarkRead(b *testing.B) {
+	ctx := context.Background()
 	var buf bytes.Buffer
 	w, err := NewParquetWriter(&buf, MaxPageSize(10000))
 	assert.Nil(b, err, "benchmark read")
@@ -934,11 +939,11 @@ func BenchmarkRead(b *testing.B) {
 	err = w.Close()
 	assert.Nil(b, err, "benchmark read")
 
-	r, err := NewParquetReader(bytes.NewReader(buf.Bytes()))
+	r, err := NewParquetReader(ctx, bytes.NewReader(buf.Bytes()))
 	assert.Nil(b, err)
 
 	for i := 0; i < b.N; i++ {
-		if !r.Next() {
+		if !r.Next(ctx) {
 			b.Fatal("unexpected end of Next()")
 		}
 		var p Person
